@@ -55,11 +55,12 @@ public class NetworkManager : MonoBehaviour {
             Debug.LogError("No spawn spots");
             return;
         }
+        /*
         SpawnObject myPlayerSpawn = spawnSpots[Random.Range(0, spawnSpots.Length)];
         GameObject myPlayerInstance = PhotonNetwork.Instantiate("FPSPlayer", myPlayerSpawn.transform.position, myPlayerSpawn.transform.rotation, 0);
         myPlayerInstance.GetComponent<UnityStandardAssets.Characters.FirstPerson.FirstPersonController>().enabled = true;
         myPlayerInstance.GetComponent<CharacterController>().enabled = true;
-        myPlayerInstance.GetComponentInChildren<Camera>().enabled = true;
+        //myPlayerInstance.GetComponentInChildren<Camera>().enabled = true;
         myPlayerInstance.GetComponentInChildren<AudioListener>().enabled = true;
         myPlayerInstance.GetComponentInChildren<GunFire>().enabled = true;
 
@@ -69,11 +70,12 @@ public class NetworkManager : MonoBehaviour {
 
         //myPlayerInstance.transform.Find("Soldier").gameObject.SetActive(false);
 
-        GameObject fpcharacter = myPlayerInstance.transform.Find("FirstPersonCharacter").gameObject;
-        fpcharacter.transform.Find("m4a1-fp").gameObject.SetActive(true);
+        //GameObject fpcharacter = myPlayerInstance.transform.Find("FirstPersonCharacter").gameObject;
+        //fpcharacter.transform.Find("m4a1-fp").gameObject.SetActive(true);
 
 
         // disable server camera
+        */
         DisableServerCamera();
     }
 

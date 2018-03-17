@@ -153,13 +153,9 @@ public class GunFire : NetworkBehaviour
         {
             Reload();
         }
-        if (Input.GetMouseButton(1))
-        {
-            Aim();
-            //GetComponent<Animation>().Play("Aim");
-        }
 
     }
+
 
     void ResetAmmo()
     {
@@ -331,7 +327,7 @@ public class GunFire : NetworkBehaviour
             }
         }
         //Networked FX
-        fxManager.GunShotFX(bulletOriginCamera.transform.position, hit, colliderTransform.tag == "Player" ? FXManager.MaterialType.Player : FXManager.MaterialType.Other);
+        fxManager.GunShotFX(bulletOriginCamera.transform, hit, colliderTransform.tag == "Player" ? FXManager.MaterialType.Player : FXManager.MaterialType.Other);
 
     }
 
