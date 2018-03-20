@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class AmmoBoxScript : MonoBehaviour {
 
+    void Start()
+    {
+
+    }
+
     private void OnTriggerEnter(Collider collider)
     {
         Debug.Log("Ammo box collision");
@@ -12,7 +17,8 @@ public class AmmoBoxScript : MonoBehaviour {
             PhotonView pv = collider.GetComponent<PhotonView>();
             if( pv != null )
             {
-                pv.RPC("PickupAmmo", PhotonTargets.All, 100);
+                GameObject.FindObjectOfType<FXManager>().PlayLocalPickup();
+                pv.RPC("PickupAmmo", PhotonTargets.All, 100, 3);                
                 gameObject.GetComponent<PhotonView>().RPC("DestroyAmmoBox", PhotonTargets.All);
             }
 

@@ -13,7 +13,9 @@ public class GunFire : NetworkBehaviour
     public GameObject bulletPrefab;
     public GameObject muzzleFlash;
     public Animator animator;
-    
+
+    [SerializeField]
+    GameObject grenadePrefab;
 
     public Camera bulletOriginCamera;
 
@@ -39,7 +41,11 @@ public class GunFire : NetworkBehaviour
     [SerializeField]
     Animation firstPersonAnimations;
 
+    [SerializeField]
+    Ammo ammo;
+
     bool _autoFire = false;
+    bool _isFiring = false;
     float _actionCoolDown = 0.5f;
 
 
@@ -51,7 +57,10 @@ public class GunFire : NetworkBehaviour
     string _popup = "";
 
     GUIStyle _guiStyle = new GUIStyle();
-    
+
+    Transform firstPersonView;
+    private Vector3 zeroAngle = Vector3.zero;
+
     public void OnGUI()
     {
         if (_popup != null && _popup != "")
@@ -81,16 +90,20 @@ public class GunFire : NetworkBehaviour
         {
             Debug.LogError("Can't find FXManager");
         }
+        FirstPersonView fpv = GameObject.FindObjectOfType<FirstPersonView>();
+        firstPersonView = fpv.transform;
     }
 
     // Update is called once per frame
     void Update()
     {
+        // restore recoil
+        firstPersonView.localRotation = Quaternion.Slerp(firstPersonView.localRotation, Quaternion.identity, Time.deltaTime*3f);
 
         cooldown = cooldown <= 0 ? 0 : cooldown - Time.deltaTime;
         _actionTimer = _actionTimer <= 0 ? 0 : _actionTimer - Time.deltaTime;
 
-        if (GlobalAmmo.CurrentAmmo <= 0)
+        if (ammo.ammoMagazine <= 0)
         {
             if (Input.GetButtonDown("Fire1"))
             {
@@ -99,39 +112,33 @@ public class GunFire : NetworkBehaviour
         }
         else
         {
-            /*
-            // TBD: autofire 
-            if (Input.GetButton("Fire1") && Time.time > nextActionTime)
-            {
-                nextActionTime += period;
-
-                if (!autoShot.isPlaying)
-                {
-                    autoShot.Play();
-                }
-                Fire();
-
-            }
-            else
-            {
-                autoShot.Stop();
-            }
-            */
             if (_autoFire && Input.GetButton("Fire1"))
             {
+                firstPersonView.Rotate(-1, 0, 0);
                 Fire();
+
             } else
             {
-                autoShot.Stop();
+                if( _isFiring  )
+                {
+                    _isFiring = false;
+                    autoShot.Stop();
+                    
+                }
+                
             }
             if (!_autoFire && Input.GetButtonDown("Fire1"))
             {
+                _isFiring = true;                
+                firstPersonView.Rotate(-1, 0, 0);
                 Fire();
+                _isFiring = false;
             }
             if( !Input.GetButton("Fire1") )
             {
                 animator.ResetTrigger("Attack");
             }
+            
         }
 
         if (Input.GetKeyDown(KeyCode.B))
@@ -153,14 +160,10 @@ public class GunFire : NetworkBehaviour
         {
             Reload();
         }
-
-    }
-
-
-    void ResetAmmo()
-    {
-        GlobalAmmo.CurrentAmmo = 30;
-        animator.SetBool("Aiming", true);
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            ThrowNade();
+        }
     }
 
     IEnumerator FireAnim(float delay)
@@ -182,6 +185,26 @@ public class GunFire : NetworkBehaviour
         }
     }
 
+    void ThrowNade()
+    {
+        if(cooldown > 0)
+        {
+            // not ready
+            return;
+        }
+        cooldown = _fireRateNorm;
+
+        // no nades
+        if( ammo.grenades <= 0 )
+        {
+            return;
+        }
+
+        GameObject grenade = PhotonNetwork.Instantiate("Grenade", bulletOriginCamera.transform.position, bulletOriginCamera.transform.rotation, 0);
+        grenade.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 1) * 20f;
+        ammo.UseNade();
+    }
+
     void Fire()
     {
         if (cooldown > 0)
@@ -194,18 +217,31 @@ public class GunFire : NetworkBehaviour
         // play animation & sfx
         DropCasing();
 
-        gunshot.Play();
+        if (_autoFire)
+        {
+            if (!_isFiring)
+            {
+                _isFiring = true;
+                autoShot.Play();
+            }
+        } else
+        {
+            gunshot.Play();
+        }
+        
 
         animator.SetBool("Aiming", true);
 
-        if (GlobalAmmo.CurrentAmmo <= 0)
+
+
+        if (ammo.ammoMagazine <= 0)
         {
             // do nothing
             return;
         }
 
         // GetComponent<Animation>().Play("GunShot");
-        GlobalAmmo.CurrentAmmo -= 1;
+        ammo.UseRound();
         StartCoroutine(FireAnim(0.2f));
         muzzleFlash.GetComponent<ParticleSystem>().Play();
         if (firstPersonAnimations != null)
@@ -222,7 +258,7 @@ public class GunFire : NetworkBehaviour
         // Add velocity to the bullet
         //bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * muzzleSpeed + bullet.transform.right * width + bullet.transform.up * height;
 
-        Ray ray = new Ray(bulletOriginCamera.transform.position+Vector3.forward*1, bulletOriginCamera.transform.forward);
+        Ray ray = bulletOriginCamera.ScreenPointToRay(Input.mousePosition);
 
 
 
@@ -243,7 +279,7 @@ public class GunFire : NetworkBehaviour
 
         if (Physics.Raycast(ray, out hit, effectiveRange * 2))
         {
-            //DebugDrawLine(bulletOriginCamera.transform.position + Vector3.forward * 1, hit.point, Color.green, 10f);
+            //DebugDrawLine(Input.mousePosition, hit.point, Color.green, 10f);
 
             Collider target = hit.collider;
             float distance = hit.distance;
@@ -293,8 +329,8 @@ public class GunFire : NetworkBehaviour
             firstPersonAnimations.Play("Reload");
         }
         animator.ResetTrigger("Attack");
-        animator.SetBool("Aiming", false);        
-        Invoke("ResetAmmo", 2.0f);
+        animator.SetBool("Aiming", false);
+        ammo.Reload();
     }
 
     void Aim()
@@ -323,9 +359,11 @@ public class GunFire : NetworkBehaviour
                 //Debug.LogError("No net ID associated with hit obj");
             } else
             {
-                pv.RPC("TakeDamage", PhotonTargets.All, dmg);
+                pv.RPC("TakeDamage", PhotonTargets.All, dmg, pv.owner);
             }
         }
+        Debug.Log("hit " + colliderTransform.name);
+        Debug.Log(colliderTransform.tag);
         //Networked FX
         fxManager.GunShotFX(bulletOriginCamera.transform, hit, colliderTransform.tag == "Player" ? FXManager.MaterialType.Player : FXManager.MaterialType.Other);
 

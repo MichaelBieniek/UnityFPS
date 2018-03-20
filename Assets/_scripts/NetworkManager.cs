@@ -6,10 +6,10 @@ public class NetworkManager : MonoBehaviour {
 
     SpawnObject[] spawnSpots;
 
-    [SerializeField]
-    GameObject serverCamera;
+    public GameObject serverCamera;
 
-	// Use this for initialization
+    public float respawnTimer = 0f;
+    // Use this for initialization
 	void Start () {
         Connect();
         spawnSpots = GameObject.FindObjectsOfType<SpawnObject>();
@@ -17,8 +17,18 @@ public class NetworkManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
-	}
+        if(respawnTimer > 0)
+        {
+            respawnTimer -= Time.deltaTime;
+            if(respawnTimer <= 0 )
+            {
+                // respawn;
+                SpawnLocalPlayer();
+
+            }
+        }
+
+    }
 
     void Connect()
     {
@@ -28,7 +38,11 @@ public class NetworkManager : MonoBehaviour {
 
     private void OnGUI()
     {
+        GUILayout.BeginArea(new Rect(20, 20, 100, 50));
         GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
+        GUILayout.Label(PhotonNetwork.networkingPeer.RoundTripTime + "");
+        GUILayout.EndArea();
+
     }
 
     void OnJoinedLobby()
@@ -49,20 +63,28 @@ public class NetworkManager : MonoBehaviour {
 
     void SpawnLocalPlayer()
     {
-
+        
         if( spawnSpots == null )
         {
             Debug.LogError("No spawn spots");
             return;
         }
-        /*
+        
         SpawnObject myPlayerSpawn = spawnSpots[Random.Range(0, spawnSpots.Length)];
         GameObject myPlayerInstance = PhotonNetwork.Instantiate("FPSPlayer", myPlayerSpawn.transform.position, myPlayerSpawn.transform.rotation, 0);
+
+
         myPlayerInstance.GetComponent<UnityStandardAssets.Characters.FirstPerson.FirstPersonController>().enabled = true;
         myPlayerInstance.GetComponent<CharacterController>().enabled = true;
-        //myPlayerInstance.GetComponentInChildren<Camera>().enabled = true;
-        myPlayerInstance.GetComponentInChildren<AudioListener>().enabled = true;
-        myPlayerInstance.GetComponentInChildren<GunFire>().enabled = true;
+
+        ReactivateChildren(myPlayerInstance.transform.Find("FirstPersonView").gameObject, true);
+
+        Camera[] cameras = myPlayerInstance.GetComponentsInChildren<Camera>();
+        foreach (Camera item in cameras)
+        {
+            item.gameObject.SetActive(false);
+            item.gameObject.SetActive(true);
+        }
 
         myPlayerInstance.GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
 
@@ -75,12 +97,33 @@ public class NetworkManager : MonoBehaviour {
 
 
         // disable server camera
-        */
+        
         DisableServerCamera();
+    }
+
+    void ReactivateChildren(GameObject g, bool a)
+    {
+        g.SetActive(a);
+
+        foreach (Transform child in g.transform)
+        {
+            ReactivateChildren(child.gameObject, a);
+        }
     }
 
     void DisableServerCamera()
     {
         serverCamera.SetActive(false);
+    }
+
+    public PhotonPlayer[] GetAllPlayers()
+    {
+        return PhotonNetwork.playerList;
+    }
+
+    [PunRPC]
+    public void LogKill(PhotonPlayer source, PhotonPlayer target)
+    {
+        Debug.Log(source.ID + " killed " + target.ID);
     }
 }
