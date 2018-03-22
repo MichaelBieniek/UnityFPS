@@ -18,7 +18,7 @@ public class GunFire : NetworkBehaviour
     GameObject grenadePrefab;
 
     public Camera bulletOriginCamera;
-
+    public GameObject player;
 
     public float effectiveRange = 100f;
     public float muzzleSpeed = 500f;
@@ -122,8 +122,7 @@ public class GunFire : NetworkBehaviour
                 if( _isFiring  )
                 {
                     _isFiring = false;
-                    autoShot.Stop();
-                    
+                    //autoShot.Stop();                    
                 }
                 
             }
@@ -200,8 +199,9 @@ public class GunFire : NetworkBehaviour
             return;
         }
 
-        GameObject grenade = PhotonNetwork.Instantiate("Grenade", bulletOriginCamera.transform.position, bulletOriginCamera.transform.rotation, 0);
-        grenade.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 1) * 20f;
+        GameObject grenade = PhotonNetwork.Instantiate("Grenade", player.transform.position + new Vector3(0, 1, 1), player.transform.rotation, 0);
+        Debug.Log(player.transform.rotation.eulerAngles);
+        grenade.GetComponent<Rigidbody>().AddForce(player.transform.forward*10f);
         ammo.UseNade();
     }
 
@@ -217,22 +217,9 @@ public class GunFire : NetworkBehaviour
         // play animation & sfx
         DropCasing();
 
-        if (_autoFire)
-        {
-            if (!_isFiring)
-            {
-                _isFiring = true;
-                autoShot.Play();
-            }
-        } else
-        {
-            gunshot.Play();
-        }
-        
+        gunshot.Play();
 
         animator.SetBool("Aiming", true);
-
-
 
         if (ammo.ammoMagazine <= 0)
         {
@@ -404,7 +391,7 @@ public class GunFire : NetworkBehaviour
                     newLeftGun.transform.localRotation = Quaternion.Euler(90, 0, 0);
                 }
                 animator.runtimeAnimatorController = hand.controller;
-                Debug.Log("Added weapon " + name);
+                //Debug.Log("Added weapon " + name);
                 return;
             }
         }

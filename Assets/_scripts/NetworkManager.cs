@@ -79,7 +79,7 @@ public class NetworkManager : MonoBehaviour {
 
         ReactivateChildren(myPlayerInstance.transform.Find("FirstPersonView").gameObject, true);
 
-        Camera[] cameras = myPlayerInstance.GetComponentsInChildren<Camera>();
+        Camera[] cameras = myPlayerInstance.transform.Find("FirstPersonView").gameObject.GetComponentsInChildren<Camera>();
         foreach (Camera item in cameras)
         {
             item.gameObject.SetActive(false);
@@ -124,6 +124,6 @@ public class NetworkManager : MonoBehaviour {
     [PunRPC]
     public void LogKill(PhotonPlayer source, PhotonPlayer target)
     {
-        Debug.Log(source.ID + " killed " + target.ID);
+        //Debug.Log(source.ID + " killed " + target.ID);
     }
 }

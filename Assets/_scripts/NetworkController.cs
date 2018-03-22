@@ -40,8 +40,8 @@ public class NetworkController : Photon.MonoBehaviour {
             stream.SendNext(transform.position);
             stream.SendNext(transform.rotation);
             stream.SendNext(anim.GetBool("Death"));
-            //stream.SendNext(anim.GetBool("Aiming"));
-            //stream.SendNext(anim.GetBool("Attack"));
+            stream.SendNext(anim.GetBool("Aiming"));
+            stream.SendNext(anim.GetBool("Attack"));
             //stream.SendNext(anim.GetFloat("Speed"));
         }
         else
@@ -50,10 +50,24 @@ public class NetworkController : Photon.MonoBehaviour {
             realPosition = (Vector3)stream.ReceiveNext();
             realRotation = (Quaternion)stream.ReceiveNext();
             anim.SetBool("Death", (bool)stream.ReceiveNext());
-            //anim.SetBool("Aiming", (bool)stream.ReceiveNext());
-            //anim.SetBool("Attack", (bool)stream.ReceiveNext());
+            anim.SetBool("Aiming", (bool)stream.ReceiveNext());
+            anim.SetBool("Attack", (bool)stream.ReceiveNext());
             //anim.SetFloat("Speed", (float)stream.ReceiveNext());
 
         }
     }
+
+    [PunRPC]
+    public void LogEvent(string source, string action, string target)
+    {
+        if( action == "killed" )
+        {
+            KillFeed killfeed = FindObjectOfType<KillFeed>();
+            killfeed.OnKill(source, target);
+        } else
+        {
+            Debug.LogError("not implemented");
+        }
+    }
+   
 }

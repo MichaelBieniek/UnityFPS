@@ -23,7 +23,7 @@ public class Health : MonoBehaviour {
             uiText.text = "" + _currentHealth;
         }
 
-        Transform soldier = gameObject.transform.Find("Solider");
+        Transform soldier = gameObject.transform.Find("Soldier");
         if( soldier != null )
         {
             _animator = soldier.GetComponent<Animator>();
@@ -35,6 +35,8 @@ public class Health : MonoBehaviour {
     [PunRPC]
     public void TakeDamage(float amt, PhotonPlayer source)
     {
+        if (_currentHealth <= 0) return;    // don't do anything if target is already dead
+
         Debug.Log(gameObject.transform.name + " is taking " + amt + " dmg");
         _currentHealth -= amt;
         if(uiText != null)
@@ -54,7 +56,7 @@ public class Health : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.K))
         {
             //suicide
-            Die(PhotonPlayer.Find(_pv.viewID));
+            Die(_pv.owner);
         }
     }
 
@@ -83,19 +85,29 @@ public class Health : MonoBehaviour {
             {
                 if( gameObject.tag == "Player" )
                 {
+                    PlayDeathAnimation();
+
                     PhotonPlayer target = _pv.owner;
-                    NetworkManager _manager = GameObject.FindObjectOfType<NetworkManager>();
-                    PhotonPlayer[] players = _manager.GetAllPlayers();
+                    NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
+                    PhotonPlayer[] players = manager.GetAllPlayers();
+                    
                     // give the target a death
                     //UpdateScore(target, 0, 1);
                     // give the origin player a kill
                     //UpdateScore(source, 1, 0);
-                    _manager.LogKill(source, target);
+                    
+                    // send event to kill feed
+                    _pv.RPC("LogEvent", PhotonTargets.All, "Player " + source.ID, "killed", "Player " + target.ID);
+                                    
 
-                    PlayDeathAnimation();
                     NetworkManager nm = GameObject.FindObjectOfType<NetworkManager>();
+                    GameObject fpv = GameObject.FindObjectOfType<FirstPersonView>().gameObject;
+                    Destroy(fpv);
+                    
+                    // enable server camera
                     nm.serverCamera.SetActive(true);
                     nm.respawnTimer = 3f;
+
                     Invoke("DestroyObject", 3f);
                     //GUILayout.Label();
                 } else

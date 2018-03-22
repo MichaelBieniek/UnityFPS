@@ -29,7 +29,7 @@ public class Ammo : MonoBehaviour {
 
     void UpdateUI()
     {
-        Debug.Log("Updating UI");
+        //Debug.Log("Updating UI");
         uiText.text = "" + ammoMagazine + "/" + ammoTotal;
         if( ammoTotal == 0 && ammoMagazine == 0)
         {
