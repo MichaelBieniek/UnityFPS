@@ -98,7 +98,7 @@ public class Health : MonoBehaviour {
                     
                     // send event to kill feed
                     _pv.RPC("LogEvent", PhotonTargets.All, "Player " + source.ID, "killed", "Player " + target.ID);
-                                    
+                    _pv.RPC("DeathFX", PhotonTargets.All, gameObject.transform.position);               
 
                     NetworkManager nm = GameObject.FindObjectOfType<NetworkManager>();
                     GameObject fpv = GameObject.FindObjectOfType<FirstPersonView>().gameObject;
@@ -130,7 +130,6 @@ public class Health : MonoBehaviour {
     {
         if( _animator != null )
         {
-            Debug.Log("Death anim");
             _animator.SetTrigger("Death");
         }
     }

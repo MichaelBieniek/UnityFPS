@@ -18,17 +18,32 @@ public class FXManager : MonoBehaviour {
     GameObject linePrefab;
 
     [SerializeField]
+    GameObject muzzleFlash;
+    [SerializeField]
+    AudioClip gunshot;
+
+    [SerializeField]
     AudioSource pickup;
+
+    [SerializeField] AudioSource hurt;
+    [SerializeField] AudioClip hurt1;
+    [SerializeField] AudioClip hurt2;
+    [SerializeField] AudioClip hurt3;
+    [SerializeField] AudioClip hurt4;
+
+    [SerializeField] AudioClip death;
 
     // grenades
     [SerializeField]
     GameObject explosionPrefab;
 
     public enum MaterialType {
+        Metal = 0,
         Ground = 1,
         Wood = 2,
         Player = 3,
-        Other = 4
+        Stone = 4,
+        Other = 9,
     };
 
     public void PlayLocalPickup()
@@ -42,19 +57,45 @@ public class FXManager : MonoBehaviour {
         Instantiate(explosionPrefab, source.position, Quaternion.identity);
     }
 
-	[PunRPC] 
-    public void GunShotFX(Transform source, RaycastHit hit, MaterialType material)
+    public void DeathFX(Vector3 position)
     {
-        //GameObject line = Instantiate(linePrefab, source.position, source.rotation);
-        Debug.Log(hit.collider.material);
+        AudioSource.PlayClipAtPoint(death, position);
+    }
 
+    public void GunShotFX(Vector3 position)
+    {
+        AudioSource.PlayClipAtPoint(gunshot, position);
+
+        // muzzle flash
+        Instantiate(muzzleFlash, position, Quaternion.identity);
+    }
+
+    public void HitFX(Vector3 hitPoint, Vector3 hitForward, MaterialType material)
+    {
+        
         if( material == MaterialType.Player )
         {
-            GameObject splatter = Instantiate(bloodSprayPrefab, hit.point, Quaternion.identity);
+            GameObject splatter = Instantiate(bloodSprayPrefab, hitPoint, Quaternion.identity);
+            int clip = (int)Random.Range(0, 4);
+            switch( clip )
+            {
+                case 0:
+                    AudioSource.PlayClipAtPoint(hurt1, hitPoint);
+                    break;
+                case 1:
+                    AudioSource.PlayClipAtPoint(hurt2, hitPoint);
+                    break;
+                case 2:
+                    AudioSource.PlayClipAtPoint(hurt3, hitPoint);
+                    break;
+                default:
+                    AudioSource.PlayClipAtPoint(hurt4, hitPoint);
+                    break;
+            }            
         }
         else
         {
-            GameObject bulletImpact = Instantiate(ReturnBulletImpactPrefab(hit.collider.material), hit.point, Quaternion.Euler(hit.transform.forward));
+            GameObject bulletImpact = Instantiate(ReturnBulletImpactPrefab(material), hitPoint, Quaternion.Euler(hitForward));
             Destroy(bulletImpact, 15f);
         }
         //GameObject explosion = Instantiate(explosionPrefab, hit.point, Quaternion.identity);
@@ -62,16 +103,21 @@ public class FXManager : MonoBehaviour {
 
     }
 
-    GameObject ReturnBulletImpactPrefab(PhysicMaterial material)
+    GameObject ReturnBulletImpactPrefab(MaterialType material)
     {
-        Debug.Log(material.name.ToString());
-        if( material.name.ToString() == "Metal (Instance)")
+        if( material == MaterialType.Metal)
         {
             return biMetal;
-        } else if (material.name == "Wood (Instance)")
+        }
+        else if (material == MaterialType.Wood)
         {
             return biWood;
-        } else
+        }
+        else if (material == MaterialType.Stone)
+        {
+            return biConcrete;
+        }
+        else
         {
             return biOther;
         }

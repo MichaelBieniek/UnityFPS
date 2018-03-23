@@ -90,7 +90,6 @@ public class Ammo : MonoBehaviour {
     public void UseRound()
     {
         ammoMagazine--;
-        Debug.Log("Round expended, left: " + ammoMagazine);
         UpdateUI();
     }
 

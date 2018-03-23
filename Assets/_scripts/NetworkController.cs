@@ -12,12 +12,16 @@ public class NetworkController : Photon.MonoBehaviour {
     float lastUpdateTime;
     string playerName;
 
+    FXManager _fxManager;
+
 	// Use this for initialization
 	void Start () {
         MonoBehaviour[] children = GetComponentsInChildren<MonoBehaviour>();
 
         //name our player
         this.playerName = "player" + photonView.ownerId;
+
+        _fxManager = GameObject.FindObjectOfType<FXManager>();
     }
 	
 	// Update is called once per frame
@@ -42,7 +46,7 @@ public class NetworkController : Photon.MonoBehaviour {
             stream.SendNext(anim.GetBool("Death"));
             stream.SendNext(anim.GetBool("Aiming"));
             stream.SendNext(anim.GetBool("Attack"));
-            //stream.SendNext(anim.GetFloat("Speed"));
+            stream.SendNext(anim.GetFloat("Speed"));
         }
         else
         {
@@ -52,7 +56,7 @@ public class NetworkController : Photon.MonoBehaviour {
             anim.SetBool("Death", (bool)stream.ReceiveNext());
             anim.SetBool("Aiming", (bool)stream.ReceiveNext());
             anim.SetBool("Attack", (bool)stream.ReceiveNext());
-            //anim.SetFloat("Speed", (float)stream.ReceiveNext());
+            anim.SetFloat("Speed", (float)stream.ReceiveNext());
 
         }
     }
@@ -69,5 +73,23 @@ public class NetworkController : Photon.MonoBehaviour {
             Debug.LogError("not implemented");
         }
     }
-   
+
+    [PunRPC]
+    public void GunShotFX(Vector3 position)
+    {
+        _fxManager.GunShotFX(position);
+    }
+
+    [PunRPC]
+    public void HitFX(Vector3 hitPoint, Vector3 hitForward, FXManager.MaterialType material)
+    {
+        _fxManager.HitFX(hitPoint, hitForward, material);
+    }
+
+    [PunRPC]
+    public void DeathFX(Vector3 position)
+    {
+        _fxManager.DeathFX(position);
+    }
+
 }

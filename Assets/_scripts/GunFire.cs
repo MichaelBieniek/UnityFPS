@@ -11,7 +11,6 @@ public class GunFire : NetworkBehaviour
     private const string PLAYER_TAG = "Player";
     public GameObject casing;
     public GameObject bulletPrefab;
-    public GameObject muzzleFlash;
     public Animator animator;
 
     [SerializeField]
@@ -19,6 +18,7 @@ public class GunFire : NetworkBehaviour
 
     public Camera bulletOriginCamera;
     public GameObject player;
+    PhotonView _pv;
 
     public float effectiveRange = 100f;
     public float muzzleSpeed = 500f;
@@ -30,13 +30,14 @@ public class GunFire : NetworkBehaviour
     GameObject currentPlayer;
 
     [SerializeField]
-    AudioSource gunshot;
-    [SerializeField]
     AudioSource click;
     [SerializeField]
     AudioSource reload;
     [SerializeField]
     AudioSource autoShot;
+    [SerializeField]
+    ParticleSystem muzzleFlash;
+    
 
     [SerializeField]
     Animation firstPersonAnimations;
@@ -92,6 +93,8 @@ public class GunFire : NetworkBehaviour
         }
         FirstPersonView fpv = GameObject.FindObjectOfType<FirstPersonView>();
         firstPersonView = fpv.transform;
+
+        _pv = player.GetComponent<PhotonView>();
     }
 
     // Update is called once per frame
@@ -178,7 +181,7 @@ public class GunFire : NetworkBehaviour
     {
         if( casing != null )
         {
-            var droppedCasing = (GameObject)Instantiate(casing, muzzleFlash.transform.position + new Vector3(0, -1f, 0.5f), Random.rotation);
+            var droppedCasing = (GameObject)Instantiate(casing, player.transform.position + new Vector3(0, -1f, 0.5f), Random.rotation);
             droppedCasing.GetComponent<Rigidbody>().velocity = new Vector3(1, 0, 0) * 5f;
             Destroy(droppedCasing, 10f);
         }
@@ -201,7 +204,7 @@ public class GunFire : NetworkBehaviour
 
         GameObject grenade = PhotonNetwork.Instantiate("Grenade", player.transform.position + new Vector3(0, 1, 1), player.transform.rotation, 0);
         Debug.Log(player.transform.rotation.eulerAngles);
-        grenade.GetComponent<Rigidbody>().AddForce(player.transform.forward*10f);
+        grenade.GetComponent<Rigidbody>().velocity = player.transform.forward * 10f;
         ammo.UseNade();
     }
 
@@ -213,11 +216,14 @@ public class GunFire : NetworkBehaviour
             return;
         }
         cooldown = _fireRateNorm;
-
+        
         // play animation & sfx
         DropCasing();
 
-        gunshot.Play();
+        muzzleFlash.Play();
+        _pv.RPC("GunShotFX", PhotonTargets.All, muzzleFlash.transform.position);
+
+        //gunshot.Play();
 
         animator.SetBool("Aiming", true);
 
@@ -230,7 +236,7 @@ public class GunFire : NetworkBehaviour
         // GetComponent<Animation>().Play("GunShot");
         ammo.UseRound();
         StartCoroutine(FireAnim(0.2f));
-        muzzleFlash.GetComponent<ParticleSystem>().Play();
+        
         if (firstPersonAnimations != null)
         {
             firstPersonAnimations.Play("GunShot");
@@ -269,9 +275,15 @@ public class GunFire : NetworkBehaviour
             //DebugDrawLine(Input.mousePosition, hit.point, Color.green, 10f);
 
             Collider target = hit.collider;
+            
             float distance = hit.distance;
 
             float effDmg = 0;
+            if (target.name == "HeadCollider")
+            {
+                Debug.Log("headshot");
+                baseDmg = baseDmg * 4;
+            }
             if (distance > 2 * effectiveRange)
             {
                 //bullet traveled twice the effective range, 0 dmg
@@ -352,7 +364,7 @@ public class GunFire : NetworkBehaviour
         Debug.Log("hit " + colliderTransform.name);
         Debug.Log(colliderTransform.tag);
         //Networked FX
-        fxManager.GunShotFX(bulletOriginCamera.transform, hit, colliderTransform.tag == "Player" ? FXManager.MaterialType.Player : FXManager.MaterialType.Other);
+        _pv.RPC("HitFX", PhotonTargets.All, hit.point, hit.transform.forward, colliderTransform.tag == "Player" ? FXManager.MaterialType.Player : FXManager.MaterialType.Other);
 
     }
 

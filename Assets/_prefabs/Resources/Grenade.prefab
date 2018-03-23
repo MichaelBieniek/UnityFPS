@@ -429,7 +429,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 623cad4865323e846969be643d13795f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  explodeRadius: 20
+  explodeRadius: 10
   baseDmg: 150
 --- !u!135 &135610728169323164
 SphereCollider:
