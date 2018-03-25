@@ -1,12 +1,12 @@
 # UnityFPS
 A multiplayer first-person shooter developed in Unity 2018 for educational purposes.
 
-##Features
+## Features
 - Rigid body bullet mechanics, bullet drop, muzzle velocity
 - Surface penetration
 - Ricochet chance
 
-##Attribution
+## Attribution
 This work uses these sounds from freesound:
 141572__yzhamua__m4a1-reload.mp3 by yzhamua ( https://freesound.org/people/yzhamua/sounds/141572/ )
 170272__knova__gun-click.wav by knova (https://freesound.org/people/knova/sounds/170272/)
