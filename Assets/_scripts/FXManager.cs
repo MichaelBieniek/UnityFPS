@@ -21,6 +21,8 @@ public class FXManager : MonoBehaviour {
     GameObject muzzleFlash;
     [SerializeField]
     AudioClip gunshot;
+    [SerializeField]
+    AudioSource bulletWhiz;
 
     [SerializeField]
     AudioSource pickup;
@@ -67,10 +69,12 @@ public class FXManager : MonoBehaviour {
         AudioSource.PlayClipAtPoint(gunshot, position);
 
         // muzzle flash
-        Instantiate(muzzleFlash, position, Quaternion.identity);
+        GameObject go = Instantiate(muzzleFlash, position, Quaternion.identity);
+        Destroy(go, 0.3f);
     }
 
-    public void HitFX(Vector3 hitPoint, Vector3 hitForward, MaterialType material)
+    [PunRPC]
+    public void HitFX(Vector3 hitPoint, Quaternion hitForward, MaterialType material)
     {
         
         if( material == MaterialType.Player )
@@ -95,7 +99,7 @@ public class FXManager : MonoBehaviour {
         }
         else
         {
-            GameObject bulletImpact = Instantiate(ReturnBulletImpactPrefab(material), hitPoint, Quaternion.Euler(hitForward));
+            GameObject bulletImpact = Instantiate(ReturnBulletImpactPrefab(material), hitPoint, hitForward);
             Destroy(bulletImpact, 15f);
         }
         //GameObject explosion = Instantiate(explosionPrefab, hit.point, Quaternion.identity);
@@ -121,5 +125,11 @@ public class FXManager : MonoBehaviour {
         {
             return biOther;
         }
+    }
+
+    public void BulletWhizLocal()
+    {
+        Debug.Log("play whiz");
+        bulletWhiz.Play();
     }
 }

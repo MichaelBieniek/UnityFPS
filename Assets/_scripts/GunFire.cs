@@ -16,13 +16,10 @@ public class GunFire : NetworkBehaviour
     [SerializeField]
     GameObject grenadePrefab;
 
-    public Camera bulletOriginCamera;
+    [SerializeField]
+    GameObject bulletOriginPoint;
     public GameObject player;
     PhotonView _pv;
-
-    public float effectiveRange = 100f;
-    public float muzzleSpeed = 500f;
-    public float baseDmg = 5f;
 
     private float nextActionTime = 0.0f;
     public float period = 0.1f;
@@ -203,8 +200,6 @@ public class GunFire : NetworkBehaviour
         }
 
         GameObject grenade = PhotonNetwork.Instantiate("Grenade", player.transform.position + new Vector3(0, 1, 1), player.transform.rotation, 0);
-        Debug.Log(player.transform.rotation.eulerAngles);
-        grenade.GetComponent<Rigidbody>().velocity = player.transform.forward * 10f;
         ammo.UseNade();
     }
 
@@ -241,33 +236,17 @@ public class GunFire : NetworkBehaviour
         {
             firstPersonAnimations.Play("GunShot");
         }
-
         // Create the Bullet from the Bullet Prefab
-        //var bullet = (GameObject)Instantiate(bulletPrefab, bulletOriginCamera.transform.position + new Vector3(0,0,0.5f), bulletOriginCamera.transform.rotation);
-
-        float width = 0;// Random.Range(-1f, 1f) * 1;
-        float height = 0;// Random.Range(-1f, 1f) * 1;
+        GameObject bullet = (GameObject)PhotonNetwork.Instantiate("Bullet", bulletOriginPoint.transform.position, bulletOriginPoint.transform.rotation, 0, _pv.instantiationData);
 
         // Add velocity to the bullet
         //bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * muzzleSpeed + bullet.transform.right * width + bullet.transform.up * height;
 
-        Ray ray = bulletOriginCamera.ScreenPointToRay(Input.mousePosition);
-
+        //Ray ray = bulletOriginCamera.ScreenPointToRay(Input.mousePosition);
 
 
         /*
-        RaycastHit closestHit;
-        float distance = 0f;
-
-        foreach (RaycastHit hit in hits)
-        {
-            if( hit.transform != this.transform && hit.distance < 2* effectiveRange) )
-            {
-                closestHit = hit;
-                distance = hit.distance;
-            }
-        }
-        */
+        // raycast logic commented
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, effectiveRange * 2))
@@ -302,21 +281,8 @@ public class GunFire : NetworkBehaviour
 
             InflictDamage(target, effDmg, hit);
         }
+        */
 
-    }
-
-    void DebugDrawLine(Vector3 start, Vector3 end, Color color, float duration = 0.2f)
-    {
-        GameObject myLine = new GameObject();
-        myLine.transform.position = start;
-        myLine.AddComponent<LineRenderer>();
-        LineRenderer lr = myLine.GetComponent<LineRenderer>();
-        lr.material = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
-        lr.SetColors(color, color);
-        lr.SetWidth(0.1f, 0.1f);
-        lr.SetPosition(0, start);
-        lr.SetPosition(1, end);
-        GameObject.Destroy(myLine, duration);
     }
 
     void Reload()
@@ -338,35 +304,7 @@ public class GunFire : NetworkBehaviour
         animator.SetBool("Aiming", !current);
     }
     
-    private void InflictDamage(Collider _col, float dmg, RaycastHit hit)
-    {
-        
-        Transform colliderTransform = _col.transform;
-        Health h = colliderTransform.GetComponent<Health>();
-        while(h == null && colliderTransform.parent )
-        {
-            colliderTransform = colliderTransform.parent;
-            h = colliderTransform.GetComponent<Health>();
-        }
-        if( h != null )
-        {
-
-            PhotonView pv = h.GetComponent<PhotonView>();
-            if( pv == null )
-            {
-                // take no action
-                //Debug.LogError("No net ID associated with hit obj");
-            } else
-            {
-                pv.RPC("TakeDamage", PhotonTargets.All, dmg, pv.owner);
-            }
-        }
-        Debug.Log("hit " + colliderTransform.name);
-        Debug.Log(colliderTransform.tag);
-        //Networked FX
-        _pv.RPC("HitFX", PhotonTargets.All, hit.point, hit.transform.forward, colliderTransform.tag == "Player" ? FXManager.MaterialType.Player : FXManager.MaterialType.Other);
-
-    }
+    
 
     public Transform rightGunBone;
     public Transform leftGunBone;

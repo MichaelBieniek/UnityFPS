@@ -33,5 +33,5 @@ sysinfo.txt
 *.apk
 *.unitypackage
 
-Assets/*
-!Assets/_*
+/Assets*
+!/Assets_*

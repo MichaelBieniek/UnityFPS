@@ -7,7 +7,9 @@ using System;
 public class Ammo : MonoBehaviour {
 
     [SerializeField]
-    int startingAmmo = 30;
+    int startingAmmo = 180;
+    [SerializeField]
+    int magCapacity = 30;
     [SerializeField]
     int startingGrenades = 3;
     public int ammoTotal { get; private set; }
@@ -22,7 +24,7 @@ public class Ammo : MonoBehaviour {
     void Start()
     {
         ammoTotal = startingAmmo;
-        ammoMagazine = startingAmmo;
+        ammoMagazine = Math.Min(magCapacity, startingAmmo);
         grenades = startingGrenades;
         UpdateUI();
     }
@@ -80,7 +82,7 @@ public class Ammo : MonoBehaviour {
         uiText.CrossFadeAlpha(1.0f, 0.5f, false);
 
         int putBack = ammoMagazine;
-        int reloadAmt = Math.Min(ammoTotal + ammoMagazine, 30);
+        int reloadAmt = Math.Min(ammoTotal + ammoMagazine, magCapacity);
         ammoTotal += putBack;
         ammoTotal -= reloadAmt;
         ammoMagazine = reloadAmt;

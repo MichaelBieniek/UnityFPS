@@ -47,6 +47,7 @@ public class NetworkController : Photon.MonoBehaviour {
             stream.SendNext(anim.GetBool("Aiming"));
             stream.SendNext(anim.GetBool("Attack"));
             stream.SendNext(anim.GetFloat("Speed"));
+            stream.SendNext(anim.GetBool("Jump"));
         }
         else
         {
@@ -57,6 +58,7 @@ public class NetworkController : Photon.MonoBehaviour {
             anim.SetBool("Aiming", (bool)stream.ReceiveNext());
             anim.SetBool("Attack", (bool)stream.ReceiveNext());
             anim.SetFloat("Speed", (float)stream.ReceiveNext());
+            anim.SetBool("Jump", (bool)stream.ReceiveNext());
 
         }
     }
@@ -81,15 +83,8 @@ public class NetworkController : Photon.MonoBehaviour {
     }
 
     [PunRPC]
-    public void HitFX(Vector3 hitPoint, Vector3 hitForward, FXManager.MaterialType material)
-    {
-        _fxManager.HitFX(hitPoint, hitForward, material);
-    }
-
-    [PunRPC]
     public void DeathFX(Vector3 position)
     {
         _fxManager.DeathFX(position);
     }
-
 }

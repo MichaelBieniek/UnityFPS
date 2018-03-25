@@ -33,7 +33,7 @@ public class NetworkManager : MonoBehaviour {
     void Connect()
     {
         //PhotonNetwork.offlineMode = true;
-        PhotonNetwork.ConnectUsingSettings("v0.1.0");
+        PhotonNetwork.ConnectUsingSettings("v0.2.0");
     }
 
     private void OnGUI()
@@ -69,9 +69,13 @@ public class NetworkManager : MonoBehaviour {
             Debug.LogError("No spawn spots");
             return;
         }
-        
-        SpawnObject myPlayerSpawn = spawnSpots[Random.Range(0, spawnSpots.Length)];
-        GameObject myPlayerInstance = PhotonNetwork.Instantiate("FPSPlayer", myPlayerSpawn.transform.position, myPlayerSpawn.transform.rotation, 0);
+
+        SpawnObject myPlayerSpawn = spawnSpots[0];//spawnSpots[Random.Range(0, spawnSpots.Length)];
+
+        // let's determine a random colour for our playe [0-2]
+        object[] data = new object[]{ Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f) };
+
+        GameObject myPlayerInstance = PhotonNetwork.Instantiate("FPSPlayer", myPlayerSpawn.transform.position, myPlayerSpawn.transform.rotation, 0, data);
 
 
         myPlayerInstance.GetComponent<UnityStandardAssets.Characters.FirstPerson.FirstPersonController>().enabled = true;
@@ -84,13 +88,16 @@ public class NetworkManager : MonoBehaviour {
         {
             item.gameObject.SetActive(false);
             item.gameObject.SetActive(true);
+            item.enabled = true;            
         }
 
         myPlayerInstance.GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
 
+        myPlayerInstance.transform.Find("UI").gameObject.SetActive(true);
+
         //myPlayerInstance.GetComponentInChildren<RigAssScript>().gameObject.SetActive(false);
 
-        //myPlayerInstance.transform.Find("Soldier").gameObject.SetActive(false);
+        myPlayerInstance.transform.Find("Soldier").gameObject.transform.Find("HeadRangeTrigger").gameObject.SetActive(false);
 
         //GameObject fpcharacter = myPlayerInstance.transform.Find("FirstPersonCharacter").gameObject;
         //fpcharacter.transform.Find("m4a1-fp").gameObject.SetActive(true);
