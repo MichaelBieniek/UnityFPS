@@ -217,6 +217,8 @@ GameObject:
   - component: {fileID: 114808168199028414}
   - component: {fileID: 114321475030857984}
   - component: {fileID: 114942780555765640}
+  - component: {fileID: 114940240722058650}
+  - component: {fileID: 114109666090627760}
   m_Layer: 0
   m_Name: FPSPlayer
   m_TagString: Player
@@ -2435,7 +2437,7 @@ Camera:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 512
-  m_RenderingPath: -1
+  m_RenderingPath: 1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
@@ -2462,7 +2464,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.8
+  near clip plane: 0.1
   far clip plane: 1000
   field of view: 60
   orthographic: 0
@@ -2471,7 +2473,7 @@ Camera:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294966783
-  m_RenderingPath: -1
+  m_RenderingPath: 1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
@@ -3395,6 +3397,17 @@ MonoBehaviour:
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0
   m_ChildControlHeight: 0
+--- !u!114 &114109666090627760
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1172755561904798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b54c7e2f14c1cdf449d5016d005d7f8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114162023722079570
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4066,6 +4079,18 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: 100
+--- !u!114 &114940240722058650
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1172755561904798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d853feae8383e24e90b0de26a07ffd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  climbingSpeed: 1
 --- !u!114 &114942780555765640
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4317,7 +4342,7 @@ CharacterController:
   m_Enabled: 0
   serializedVersion: 2
   m_Height: 1.8
-  m_Radius: 0.8
+  m_Radius: 0.2
   m_SlopeLimit: 45
   m_StepOffset: 0.7
   m_SkinWidth: 0.02

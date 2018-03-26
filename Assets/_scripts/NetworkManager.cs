@@ -54,6 +54,16 @@ public class NetworkManager : MonoBehaviour {
     void OnJoinedRoom()
     {
         SpawnLocalPlayer();
+        if (PhotonNetwork.isMasterClient)
+        {
+            // spawn all items
+            Spawninator[] spawninators = GameObject.FindObjectsOfType<Spawninator>();
+            foreach (Spawninator item in spawninators)
+            {
+                item.BeginSpawn();
+            }
+            //GameObject.FindObjectOfType<MissleLauncherSpawner>().Spawn();
+        }
     }
 
     void OnPhotonRandomJoinFailed()
@@ -70,7 +80,7 @@ public class NetworkManager : MonoBehaviour {
             return;
         }
 
-        SpawnObject myPlayerSpawn = spawnSpots[0];//spawnSpots[Random.Range(0, spawnSpots.Length)];
+        SpawnObject myPlayerSpawn = spawnSpots[Random.Range(0, spawnSpots.Length)];
 
         // let's determine a random colour for our playe [0-2]
         object[] data = new object[]{ Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f) };

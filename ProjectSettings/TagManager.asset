@@ -7,6 +7,8 @@ TagManager:
   - Target
   - FirstPersonViewOnly
   - Permeable
+  - nodecal
+  - Ladder
   layers:
   - Default
   - TransparentFX
