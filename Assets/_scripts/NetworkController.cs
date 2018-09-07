@@ -48,6 +48,7 @@ public class NetworkController : Photon.MonoBehaviour {
             stream.SendNext(anim.GetBool("Attack"));
             stream.SendNext(anim.GetFloat("Speed"));
             stream.SendNext(anim.GetBool("Jump"));
+            stream.SendNext(anim.GetBool("Squat"));
         }
         else
         {
@@ -59,6 +60,7 @@ public class NetworkController : Photon.MonoBehaviour {
             anim.SetBool("Attack", (bool)stream.ReceiveNext());
             anim.SetFloat("Speed", (float)stream.ReceiveNext());
             anim.SetBool("Jump", (bool)stream.ReceiveNext());
+            anim.SetBool("Squat", (bool)stream.ReceiveNext());
 
         }
     }

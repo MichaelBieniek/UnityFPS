@@ -32,7 +32,7 @@ public class NetworkManager : MonoBehaviour {
 
     void Connect()
     {
-        //PhotonNetwork.offlineMode = true;
+        PhotonNetwork.offlineMode = true;
         PhotonNetwork.ConnectUsingSettings("v0.2.0");
     }
 
